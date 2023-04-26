@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "frontend_pages.apps.FrontendPagesConfig",
     "crispy_forms",
     "crispy_tailwind",
+    "accounts.apps.AccountsConfig",
 ]
 
 MIDDLEWARE = [
@@ -144,3 +145,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 
 CRISPY_TEMPLATE_PACK = "tailwind"
+
+# Login and logout settings
+
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
