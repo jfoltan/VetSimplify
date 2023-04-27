@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Owner
+from .models import Owner, Animal
 
 
 # Register your models here.
@@ -15,4 +15,14 @@ class OwnerAdmin(admin.ModelAdmin):
         "dic",
         "created_at",
         "updated_at",
+    )
+
+
+@admin.register(Animal)
+class AnimalAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "animal_type",
+        "gender",
+        "date_of_birth",
     )

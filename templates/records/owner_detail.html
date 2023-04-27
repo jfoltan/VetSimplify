@@ -3,7 +3,7 @@
     {% include "_navbar.html" %}
 {% endblock navbar %}
 {% block title %}
-    Kartotéka
+    Detail majitele - {{ owner.last_name }} {{ owner.first_name }}
 {% endblock title %}
 {% block content %}
     <div class="container mx-auto px-4 sm:px-8 border-2 my-8 rounded-xl bg-white shadow-sm">
@@ -56,7 +56,129 @@
                 </p>
             {% endif %}
         </div>
+        <div class="my-8">
+            {% if animal_list %}
+                <div class="py-0">
+                    <div class="flex justify-between items-center -my-4">
+                        <h2 class="text-xl font-semibold leading-tight">Zvířata</h2>
+                        <a href="{% url 'records:animal_create' owner.id %}"
+                           class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 my-2 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                            Přidat zvíře
+                        </a>
+                    </div>
+                    <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+                        <div class="inline-block min-w-full shadow-md rounded-lg overflow-hidden">
+                            <table class="min-w-full leading-normal">
+                                <thead>
+                                    <tr>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Jméno
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Druh
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Plemeno
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Pohlaví
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Datum narození
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Kastrace
+                                        </th>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            Exitus
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for animal in animal_list %}
+                                        <tr>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <a href="{% url 'records:animal_detail' owner.id animal.id %}"
+                                                           class="hover:underline text-blue-600 whitespace-no-wrap text-center">{{ animal.name }}</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <p class="text-gray-900 whitespace-no-wrap text-center">{{ animal.get_animal_type_display }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <p class="text-gray-900 whitespace-no-wrap text-center">{{ animal.breed }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <p class="text-gray-900 whitespace-no-wrap text-center">{{ animal.get_gender_display }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <p class="text-gray-900 whitespace-no-wrap text-center">{{ animal.date_of_birth|default_if_none:'' }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <p class="text-gray-900 whitespace-no-wrap text-center">{{ animal.castration|yesno:"Ano,Ne" }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                                <div class="flex justify-center">
+                                                    <div class="ml-3">
+                                                        <p class="text-gray-900 whitespace-no-wrap text-center">{{ animal.dead|yesno:"Ano,Ne" }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="py-0">
+                        <div class="flex justify-between items-center -my-4">
+                            <h2 class="text-xl font-semibold leading-tight">Zvířata majitele {{ owner.first_name }} {{ owner.last_name }}</h2>
+                            <a href="{% url 'records:animal_create' owner.id %}"
+                               class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 my-2 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                                Přidat zvíře
+                            </a>
+                        </div>
+                        <div id="alert-border-4"
+                             class="flex p-4 mb-4 mt-4 text-yellow-800 border-t-4 border-yellow-300 bg-yellow-50"
+                             role="alert">
+                            <svg class="flex-shrink-0 w-5 h-5"
+                                 fill="currentColor"
+                                 viewBox="0 0 20 20"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="ml-3 text-sm font-medium">Majitel nemá žádná zvířata.</div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
+    <!-- MODAL -->
     <div id="confirm-delete-modal"
          tabindex="-1"
          class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -104,5 +226,6 @@
             </div>
         </div>
     </div>
+    <!-- END MODAL -->
 </div>
 {% endblock content %}

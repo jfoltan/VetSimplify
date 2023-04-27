@@ -149,5 +149,5 @@ CRISPY_TEMPLATE_PACK = "tailwind"
 
 # Login and logout settings
 
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "records:owner_list"
 LOGOUT_REDIRECT_URL = "home"

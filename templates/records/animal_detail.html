@@ -1,0 +1,141 @@
+{% extends "_base.html" %}
+{% block navbar %}
+    {% include "_navbar.html" %}
+{% endblock navbar %}
+{% block title %}
+    {{ animal.name }}, {{ animal.get_animal_type_display }}
+{% endblock title %}
+{% block content %}
+    <div class="container mx-auto px-4 sm:px-8 border-2 my-8 rounded-xl bg-white shadow-sm">
+        <div class="py-8">
+            <div class="flex justify-between items-center -my-4">
+                <div class="flex-1">
+                    <h2 class="text-3xl font-semibold">
+                        <a class="hover:underline text-blue-600"
+                           href="{% url 'records:owner_detail' owner_id=animal.owner.id %}">{{ animal.owner.first_name }} {{ animal.owner.last_name }}</a> | {{ animal.name }}, {{ animal.get_animal_type_display }}
+                    </h2>
+                </div>
+                <div class="flex items-center justify-end">
+                    <a href="{% url 'records:animal_update' owner_id=animal.owner.id animal_id=animal.id %}"
+                       class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 my-2 py-2.5 mr-4 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Upravit zvíře
+                    </a>
+                    <button data-modal-target="confirm-delete-modal"
+                            data-modal-toggle="confirm-delete-modal"
+                            class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                        Odstranit zvíře
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="my-4 grid grid-cols-2 gap-4">
+            <div>
+                <h3 class="text-2xl font-bold">Základní údaje:</h3>
+                <p class="text-lg">
+                    <span class="font-semibold">Pohlaví:</span> {{ animal.get_gender_display }}
+                </p>
+                <p class="text-lg">
+                    <span class="font-semibold">Plemeno:</span> {{ animal.breed }},
+                    {% if animal.color %}<span class="font-semibold">Barva:</span> {{ animal.color }}{% endif %}
+                </p>
+                <p class="text-lg">
+                    <span class="font-semibold">Datum narození:</span> {{ animal.date_of_birth }}
+                </p>
+                {% if animal.dead %}
+                    <span class="bg-gray-100 text-gray-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Exitus</span>
+                {% endif %}
+                {% if animal.castration %}
+                    <span class="bg-yellow-100 text-yellow-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
+                        {% if animal.gender == 'male' %}
+                            Kastrovaný
+                        {% else %}
+                            Kastrovaná
+                        {% endif %}
+                    </span>
+                {% endif %}
+                {% if animal.insured %}
+                    <span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Pojištěný</span>
+                {% endif %}
+            </div>
+            <div>
+                {% if animal.chip_number or animal.passport_number %}<h3 class="text-2xl font-bold">Identifikace:</h3>{% endif %}
+                {% if animal.chip_number %}
+                    <p class="text-lg">
+                        <span class="font-semibold">Číslo čipu:</span> {{ animal.chip_number }}
+                    </p>
+                {% endif %}
+                {% if animal.chip_application_date %}
+                    <p class="text-lg">
+                        <span class="font-semibold">Datum vystavení čipu:</span> {{ animal.chip_application_date }}
+                    </p>
+                {% endif %}
+                {% if animal.chip_location %}
+                    <p class="text-lg">
+                        <span class="font-semibold">Umístění čipu:</span> {{ animal.chip_location }}
+                    </p>
+                {% endif %}
+                {% if animal.passport_number %}
+                    <p class="text-lg">
+                        <span class="font-semibold">Číslo pasu:</span> {{ animal.passport_number }}
+                    </p>
+                {% endif %}
+                {% if animal.passport_issue_date %}
+                    <p class="text-lg">
+                        <span class="font-semibold">Datum vystavení pasu:</span> {{ animal.passport_issue_date }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- MODAL -->
+    <div id="confirm-delete-modal"
+         tabindex="-1"
+         class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative w-full max-w-md max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button"
+                        class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+                        data-modal-hide="confirm-delete-modal">
+                    <svg aria-hidden="true"
+                         class="w-5 h-5"
+                         fill="currentColor"
+                         viewBox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd">
+                        </path>
+                    </svg>
+                    <span class="sr-only">Zavřit okno</span>
+                </button>
+                <div class="p-6 text-center">
+                    <svg aria-hidden="true"
+                         class="mx-auto mb-4 text-gray-400 w-14 h-14 dark:text-gray-200"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Opravdu chcete odstranit zvíře?</h3>
+                    <div class="flex justify-center">
+                        <form method="post"
+                              action="{% url 'records:animal_delete' owner_id=animal.owner.id animal_id=animal.id %}">
+                            {% csrf_token %}
+                            <input data-modal-hide="confirm-delete-modal"
+                                   type="submit"
+                                   value="Ano, odstranit"
+                                   class="cursor-pointer text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                        </input>
+                    </form>
+                    <button data-modal-hide="confirm-delete-modal"
+                            type="button"
+                            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                        Ne, zrušit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END MODAL -->
+{% endblock content %}
