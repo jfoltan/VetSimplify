@@ -21,9 +21,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("unicorn/", include("django_unicorn.urls")),
     path("", include("django.contrib.auth.urls")),
     path("", include("frontend_pages.urls")),
     path("", include("accounts.urls")),
+    path("records/", include("records.urls")),
 ]
 
 if settings.DEBUG:
