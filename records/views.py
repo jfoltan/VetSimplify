@@ -6,8 +6,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
-from .forms import OwnerForm, AnimalForm, AnimalCaseForm
-from .models import Owner, Animal, AnimalCase
+from .forms import OwnerForm, AnimalForm, AnimalCaseForm, VisitForm
+from .models import Owner, Animal, AnimalCase, Visit
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 
@@ -30,6 +30,13 @@ class AnimalCaseMixin(AnimalMixin):
         animal = self.get_animal()
         animalcase_id = self.kwargs["animalcase_id"]
         return get_object_or_404(AnimalCase, animal=animal, pk=animalcase_id)
+
+
+class VisitMixin(AnimalCaseMixin):
+    def get_visit(self):
+        animal_case = self.get_animalcase()
+        visit_id = self.kwargs["visit_id"]
+        return get_object_or_404(Visit, animal_case=animal_case, pk=visit_id)
 
 
 class OwnerListView(ListView):
@@ -172,6 +179,7 @@ class AnimalCaseDetailView(AnimalCaseMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["visit_list"] = Visit.objects.filter(animal_case=self.object)
         context["animal"] = self.get_animal()
         context["owner"] = self.get_owner()
         return context
@@ -207,5 +215,67 @@ class AnimalCaseDeleteView(AnimalCaseMixin, DeleteView):
             kwargs={
                 "owner_id": self.kwargs["owner_id"],
                 "animal_id": self.kwargs["animal_id"],
+            },
+        )
+
+
+class VisitCreateView(AnimalCaseMixin, CreateView):
+    model = Visit
+    form_class = VisitForm
+    template_name = "records/visit_form.html"
+
+    def form_valid(self, form):
+        animal_case = self.get_animalcase()
+        form.instance.animal_case = animal_case
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["animal_case"] = self.get_animalcase()
+        return context
+
+    def get_success_url(self):
+        return reverse(
+            "records:animal_case_detail",
+            kwargs={
+                "owner_id": self.kwargs["owner_id"],
+                "animal_id": self.kwargs["animal_id"],
+                "animalcase_id": self.kwargs["animalcase_id"],
+            },
+        )
+
+
+class VisitUpdateView(VisitMixin, UpdateView):
+    model = Visit
+    form_class = VisitForm
+    template_name = "records/visit_update_form.html"
+
+    def get_object(self):
+        return self.get_visit()
+
+    def get_success_url(self):
+        return reverse(
+            "records:animal_case_detail",
+            kwargs={
+                "owner_id": self.kwargs["owner_id"],
+                "animal_id": self.kwargs["animal_id"],
+                "animalcase_id": self.kwargs["animalcase_id"],
+            },
+        )
+
+
+class VisitDeleteView(VisitMixin, DeleteView):
+    model = Visit
+
+    def get_object(self):
+        return self.get_visit()
+
+    def get_success_url(self):
+        return reverse(
+            "records:animal_case_detail",
+            kwargs={
+                "owner_id": self.kwargs["owner_id"],
+                "animal_id": self.kwargs["animal_id"],
+                "animalcase_id": self.kwargs["animalcase_id"],
             },
         )

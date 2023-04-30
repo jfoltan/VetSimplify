@@ -85,3 +85,20 @@ class AnimalCase(models.Model):
         elif not self.closed:
             self.closed_at = None
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.animal.name})"
+
+
+class Visit(models.Model):
+    animal_case = models.ForeignKey(
+        AnimalCase, on_delete=models.CASCADE, related_name="visits"
+    )
+    weight = models.FloatField(blank=True, null=True)
+    temperature = models.FloatField(blank=True, null=True)
+    record = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Návštěva {self.created_at} ({self.animal_case.animal.name})"

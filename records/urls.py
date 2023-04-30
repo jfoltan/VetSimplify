@@ -13,6 +13,9 @@ from .views import (
     AnimalCaseDetailView,
     AnimalCaseUpdateView,
     AnimalCaseDeleteView,
+    VisitCreateView,
+    VisitUpdateView,
+    VisitDeleteView,
 )
 
 app_name = "records"
@@ -69,5 +72,21 @@ urlpatterns = [
         "owners/<int:owner_id>/animals/<int:animal_id>/cases/<int:animalcase_id>/delete",
         AnimalCaseDeleteView.as_view(),
         name="animal_case_delete",
+    ),
+    # Visit URLs
+    path(
+        "owners/<int:owner_id>/animals/<int:animal_id>/cases/<int:animalcase_id>/visits/create",
+        VisitCreateView.as_view(),
+        name="visit_create",
+    ),
+    path(
+        "owners/<int:owner_id>/animals/<int:animal_id>/cases/<int:animalcase_id>/visits/<int:visit_id>/update",
+        VisitUpdateView.as_view(),
+        name="visit_update",
+    ),
+    path(
+        "owners/<int:owner_id>/animals/<int:animal_id>/cases/<int:animalcase_id>/visits/<int:visit_id>/delete",
+        VisitDeleteView.as_view(),
+        name="visit_delete",
     ),
 ]
