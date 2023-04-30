@@ -1,5 +1,6 @@
 from django.db import models
 from django_countries.fields import CountryField
+from django.utils import timezone
 
 # Create your models here.
 
@@ -63,6 +64,24 @@ class Animal(models.Model):
     dead = models.BooleanField(default=False)
     insured = models.BooleanField(default=False)
     note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name} ({self.animal_type})"
+
+
+class AnimalCase(models.Model):
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name="cases")
+    name = models.CharField(max_length=50)
+    closed = models.BooleanField(default=False)
+    closed_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.closed and self.closed_at is None:
+            self.closed_at = timezone.now()
+        elif not self.closed:
+            self.closed_at = None
+        super().save(*args, **kwargs)
