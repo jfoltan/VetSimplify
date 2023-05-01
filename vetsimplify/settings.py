@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "crispy_tailwind",
     "accounts.apps.AccountsConfig",
     "records.apps.RecordsConfig",
+    "stock.apps.StockConfig",
 ]
 
 MIDDLEWARE = [

@@ -26,6 +26,7 @@ urlpatterns = [
     path("", include("frontend_pages.urls")),
     path("", include("accounts.urls")),
     path("records/", include("records.urls")),
+    path("stock/", include("stock.urls")),
 ]
 
 if settings.DEBUG:
