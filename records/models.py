@@ -111,3 +111,11 @@ class VisitStockItem(models.Model):
     stock_item = models.ForeignKey("stock.StockItem", on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class VisitProcedure(models.Model):
+    visit = models.ForeignKey(
+        Visit, on_delete=models.CASCADE, related_name="procedures"
+    )
+    procedure = models.ForeignKey("procedures.Procedure", on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)

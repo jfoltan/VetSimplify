@@ -1,5 +1,5 @@
 from django import forms
-from .models import Owner, Animal, AnimalCase, Visit, VisitStockItem
+from .models import Owner, Animal, AnimalCase, Visit, VisitProcedure, VisitStockItem
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
 from django.forms.models import inlineformset_factory
@@ -213,3 +213,26 @@ class VisitForm(forms.ModelForm):
                 css_class="grid gap-4 grid-cols-6",
             ),
         )
+
+
+class VisitProcedureForm(forms.ModelForm):
+    class Meta:
+        model = VisitProcedure
+        fields = [
+            "procedure",
+            "price",
+        ]
+        labels = {
+            "procedure": "Zákrok",
+            "price": "Cena",
+        }
+
+
+VisitProcedureFormSet = inlineformset_factory(
+    Visit,
+    VisitProcedure,
+    form=VisitProcedureForm,
+    extra=0,
+    can_delete=False,
+    fields=("procedure", "price"),
+)

@@ -17,6 +17,7 @@
                 <form method="post">
                     {% csrf_token %}
                     {% crispy visit_form %}
+                    <h3 class="mt-6 text-xl font-extrabold text-center text-gray-900 leading-9">Položky ze skladu:</h3>
                     {{ formset.management_form }}
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
@@ -53,6 +54,38 @@
                             id="add-button"
                             class="mt-4 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
                         Přidat položku
+                    </button>
+                    <h3 class="mt-6 text-xl font-extrabold text-center text-gray-900 leading-9">Úkony:</h3>
+                    {{ procedure_formset.management_form }}
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 bg-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Úkon
+                                </th>
+                                <th class="px-6 py-3 bg-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Cena
+                                </th>
+                                <th class="px-6 py-3 bg-gray-200"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="procedure-form-set">
+                            {% for form in procedure_formset %}
+                                <tr>
+                                    <td>
+                                        {{ form.procedure|add_class:"border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" }}
+                                    </td>
+                                    <td>
+                                        {{ form.price|add_class:"border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="button"
+                            id="add-procedure-button"
+                            class="mt-4 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Přidat úkon
                     </button>
                     <br>
                     <button type="submit"
@@ -164,9 +197,86 @@
             setDefaultQuantity();
             addRemoveButton(newRow);
         });
+
+        const addProcedureButton = document.getElementById('add-procedure-button');
+        let procedureFormIdx = {{ procedure_formset|length }};
+        const procedureFormSet = document.getElementById('procedure-form-set');
+        const totalProcedureForms = document.querySelector("#id_visit_procedure-TOTAL_FORMS");
+
+        function updateProcedurePrice(event) {
+            const procedures = JSON.parse('{{ procedures_json|escapejs }}');
+            const formsetRow = event.target.closest('tr');
+            const targetProcedureSelect = formsetRow.querySelector('[name$="-procedure"]');
+            const targetPriceInput = formsetRow.querySelector('[name$="-price"]');
+        
+            const selectedProcedure = procedures.find(item => item.pk == targetProcedureSelect.value);
+        
+            if (selectedProcedure) {
+                targetPriceInput.value = selectedProcedure.fields.price;
+            } else {
+                targetPriceInput.value = '';
+            }
+        }
+
+        function bindProcedureSelectEvent() {
+            const procedureSelects = document.querySelectorAll('[name$="-procedure"]');
+        
+            procedureSelects.forEach(select => {
+                select.removeEventListener('change', updateProcedurePrice);
+                select.addEventListener('change', updateProcedurePrice);
+            });
+        }
+
+        function addProcedureRemoveButton(row) {
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Odstranit';
+            removeButton.type = 'button';
+            removeButton.classList.add(
+                'focus:outline-none', 'text-white', 'bg-red-700', 'hover:bg-red-800',
+                'focus:ring-4', 'focus:ring-red-300', 'font-medium', 'rounded-lg',
+                'text-sm', 'px-5', 'py-2.5', 'mr-2', 'mb-2', 'dark:bg-red-600',
+                'dark:hover:bg-red-700', 'dark:focus:ring-red-900'
+            );
+            removeButton.addEventListener('click', () => {
+                procedureFormSet.removeChild(row);
+                procedureFormIdx--;
+                totalProcedureForms.setAttribute('value', `${procedureFormIdx}`);
+            });
+            const removeButtonCell = document.createElement('td');
+            removeButtonCell.appendChild(removeButton);
+            row.appendChild(removeButtonCell);
+        }
+        
+        function addProcedureRemoveButtonsToExistingForms() {
+            const forms = procedureFormSet.querySelectorAll('tr');
+            forms.forEach(form => addProcedureRemoveButton(form));
+        }
+        
+        function createProcedureFormRow(html) {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = html;
+            newRow.querySelector('[name$="-procedure"]').classList.add("border-gray-300", "focus:border-indigo-300", "focus:ring", "focus:ring-indigo-200", "focus:ring-opacity-50", "rounded-md", "shadow-sm");
+            newRow.querySelector('[name$="-price"]').classList.add("border-gray-300", "focus:border-indigo-300", "focus:ring", "focus:ring-indigo-200", "focus:ring-opacity-50", "rounded-md", "shadow-sm");
+            return newRow;
+        }
+        
+        addProcedureButton.addEventListener('click', () => {
+            const formHTML = `
+                <td>{{ procedure_formset.empty_form.procedure|escapejs }}</td>
+                <td>{{ procedure_formset.empty_form.price|escapejs }}</td>
+            `.replace(/__prefix__/g, procedureFormIdx);
+            const newRow = createProcedureFormRow(formHTML);
+            procedureFormSet.appendChild(newRow);
+            procedureFormIdx++;
+            totalProcedureForms.setAttribute('value', `${procedureFormIdx}`);
+            addProcedureRemoveButton(newRow);
+            bindProcedureSelectEvent();
+        });
     
         bindSelectEvent();
         setDefaultQuantity();
         addRemoveButtonsToExistingForms();
+        addProcedureRemoveButtonsToExistingForms();
+        bindProcedureSelectEvent();
     </script>
 {% endblock content %}

@@ -8,7 +8,15 @@ from django.views.generic import (
 )
 
 from stock.models import StockItem
-from .forms import OwnerForm, AnimalForm, AnimalCaseForm, VisitForm, VisitFormSet
+from procedures.models import Procedure
+from .forms import (
+    OwnerForm,
+    AnimalForm,
+    AnimalCaseForm,
+    VisitForm,
+    VisitFormSet,
+    VisitProcedureFormSet,
+)
 from .models import Owner, Animal, AnimalCase, Visit
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -234,18 +242,30 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
     stock_items_json = serializers.serialize(
         "json", stock_items, fields=("pk", "selling_price")
     )
+    procedures = Procedure.objects.all()
+    procedures_json = serializers.serialize("json", procedures, fields=("pk", "price"))
 
     if request.method == "POST":
         visit_form = VisitForm(request.POST, prefix="visit")
         formset = VisitFormSet(request.POST, prefix="visit_stock_item")
+        procedure_formset = VisitProcedureFormSet(
+            request.POST, prefix="visit_procedure"
+        )
 
-        if visit_form.is_valid() and formset.is_valid():
+        if (
+            visit_form.is_valid()
+            and formset.is_valid()
+            and procedure_formset.is_valid()
+        ):
             visit = visit_form.save(commit=False)
             visit.animal_case = animal_case
             visit.save()
 
             formset.instance = visit
             formset.save()
+
+            procedure_formset.instance = visit
+            procedure_formset.save()
 
             for form in formset.forms:
                 stock_item = form.cleaned_data.get("stock_item")
@@ -263,12 +283,17 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
     else:
         visit_form = VisitForm(prefix="visit")
         formset = VisitFormSet(instance=Visit(), prefix="visit_stock_item")
+        procedure_formset = VisitProcedureFormSet(
+            instance=Visit(), prefix="visit_procedure"
+        )
 
     context = {
         "visit_form": visit_form,
         "formset": formset,
         "animal_case": animal_case,
         "stock_items_json": stock_items_json,
+        "procedures_json": procedures_json,
+        "procedure_formset": procedure_formset,
     }
     return render(request, "records/visit_form.html", context)
 
