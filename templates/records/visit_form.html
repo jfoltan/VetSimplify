@@ -1,5 +1,6 @@
 {% extends "_base.html" %}
 {% load crispy_forms_tags %}
+{% load widget_tweaks %}
 {% block navbar %}
     {% include "_navbar.html" %}
 {% endblock navbar %}
@@ -7,7 +8,7 @@
     {{ animal_case.name }} - Přidat návštěvu
 {% endblock title %}
 {% block content %}
-    <div class="flex flex-col justify-centermin-h-screen py-4 bg-gray-50 sm:px-6 lg:px-8">
+    <div class="flex flex-col justify-centermin-h-screen py-4 bg-gray-200 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">Přidat návštěvu</h2>
         </div>
@@ -15,14 +16,49 @@
             <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
                 <form method="post">
                     {% csrf_token %}
-                    {{ visit_form.as_p }}
+                    {% crispy visit_form %}
                     {{ formset.management_form }}
-                    <div id="form-set">
-                        {% for form in formset %}{{ form.as_table }}{% endfor %}
-                    </div>
-                    <button type="button" id="add-button">Přidat položku</button>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 bg-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Položka skladu
+                                </th>
+                                <th class="px-6 py-3 bg-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Množství
+                                </th>
+                                <th class="px-6 py-3 bg-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Cena
+                                </th>
+                                <th class="px-6 py-3 bg-gray-200"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="form-set">
+                            {% for form in formset %}
+                                <tr>
+                                    <td>
+                                        {{ form.stock_item|add_class:"border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" }}
+                                    </td>
+                                    <td>
+                                        {{ form.quantity|add_class:"border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" }}
+                                    </td>
+                                    <td>
+                                        {{ form.price|add_class:"border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="button"
+                            id="add-button"
+                            class="mt-4 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Přidat položku
+                    </button>
                     <br>
-                    <button type="submit">Uložit</button>
+                    <button type="submit"
+                            class="mt-8 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                        Uložit
+                    </button>
                 </form>
             </div>
         </div>
@@ -74,17 +110,24 @@
             });
         }
     
-        function addRemoveButton(form) {
+        function addRemoveButton(row) {
             const removeButton = document.createElement('button');
             removeButton.textContent = 'Odstranit';
             removeButton.type = 'button';
-            removeButton.classList.add('remove-button');
+            removeButton.classList.add(
+                'focus:outline-none', 'text-white', 'bg-red-700', 'hover:bg-red-800',
+                'focus:ring-4', 'focus:ring-red-300', 'font-medium', 'rounded-lg',
+                'text-sm', 'px-5', 'py-2.5', 'mr-2', 'mb-2', 'dark:bg-red-600',
+                'dark:hover:bg-red-700', 'dark:focus:ring-red-900'
+            );
             removeButton.addEventListener('click', () => {
-                formSet.removeChild(form);
+                formSet.removeChild(row);
                 formIdx--;
                 totalForms.setAttribute('value', `${formIdx}`);
             });
-            form.appendChild(removeButton);
+            const removeButtonCell = document.createElement('td');
+            removeButtonCell.appendChild(removeButton);
+            row.appendChild(removeButtonCell);
         }
     
         function addRemoveButtonsToExistingForms() {
@@ -97,16 +140,29 @@
             newForm.innerHTML = html;
             return newForm;
         }
+
+        function createFormRow(html) {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = html;
+            newRow.querySelector('[name$="-stock_item"]').classList.add("border-gray-300", "focus:border-indigo-300", "focus:ring", "focus:ring-indigo-200", "focus:ring-opacity-50", "rounded-md", "shadow-sm");
+            newRow.querySelector('[name$="-quantity"]').classList.add("border-gray-300", "focus:border-indigo-300", "focus:ring", "focus:ring-indigo-200", "focus:ring-opacity-50", "rounded-md", "shadow-sm");
+            newRow.querySelector('[name$="-price"]').classList.add("border-gray-300", "focus:border-indigo-300", "focus:ring", "focus:ring-indigo-200", "focus:ring-opacity-50", "rounded-md", "shadow-sm");
+            return newRow;
+        }
     
         addButton.addEventListener('click', () => {
-            const formHTML = `{{ formset.empty_form.as_table|escapejs }}`.replace(/__prefix__/g, formIdx);
-            const newForm = createFormDiv(formHTML);
-            formSet.appendChild(newForm);
+            const formHTML = `
+                <td>{{ formset.empty_form.stock_item|escapejs }}</td>
+                <td>{{ formset.empty_form.quantity|escapejs }}</td>
+                <td>{{ formset.empty_form.price|escapejs }}</td>
+            `.replace(/__prefix__/g, formIdx);
+            const newRow = createFormRow(formHTML);
+            formSet.appendChild(newRow);
             formIdx++;
             totalForms.setAttribute('value', `${formIdx}`);
             bindSelectEvent();
             setDefaultQuantity();
-            addRemoveButton(newForm);
+            addRemoveButton(newRow);
         });
     
         bindSelectEvent();

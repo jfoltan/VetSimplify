@@ -14,7 +14,7 @@ from .views import (
     AnimalCaseUpdateView,
     AnimalCaseDeleteView,
     visit_create_view,
-    VisitDeleteView,
+    visit_delete_view,
 )
 
 app_name = "records"
@@ -80,7 +80,7 @@ urlpatterns = [
     ),
     path(
         "owners/<int:owner_id>/animals/<int:animal_id>/cases/<int:animalcase_id>/visits/<int:visit_id>/delete",
-        VisitDeleteView.as_view(),
+        visit_delete_view,
         name="visit_delete",
     ),
 ]

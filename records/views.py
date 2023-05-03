@@ -247,6 +247,13 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
             formset.instance = visit
             formset.save()
 
+            for form in formset.forms:
+                stock_item = form.cleaned_data.get("stock_item")
+                quantity = form.cleaned_data.get("quantity")
+
+                stock_item.units_in_stock -= quantity
+                stock_item.save()
+
             return redirect(
                 "records:animal_case_detail",
                 owner_id=owner_id,
@@ -266,18 +273,29 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
     return render(request, "records/visit_form.html", context)
 
 
-class VisitDeleteView(VisitMixin, DeleteView):
-    model = Visit
+def visit_delete_view(request, owner_id, animal_id, animalcase_id, visit_id):
+    animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
+    visit = get_object_or_404(Visit, pk=visit_id, animal_case=animal_case)
 
-    def get_object(self):
-        return self.get_visit()
+    if request.method == "POST":
+        # Return stock items to the stock
+        for visit_stock_item in visit.stock_items.all():
+            stock_item = visit_stock_item.stock_item
+            stock_item.units_in_stock += visit_stock_item.quantity
+            stock_item.save()
 
-    def get_success_url(self):
-        return reverse(
+        # Delete the visit
+        visit.delete()
+
+        return redirect(
             "records:animal_case_detail",
-            kwargs={
-                "owner_id": self.kwargs["owner_id"],
-                "animal_id": self.kwargs["animal_id"],
-                "animalcase_id": self.kwargs["animalcase_id"],
-            },
+            owner_id=owner_id,
+            animal_id=animal_id,
+            animalcase_id=animalcase_id,
         )
+
+    context = {
+        "visit": visit,
+        "animal_case": animal_case,
+    }
+    return render(request, "records/visit_confirm_delete.html", context)

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "records.apps.RecordsConfig",
     "stock.apps.StockConfig",
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [
