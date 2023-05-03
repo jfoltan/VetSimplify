@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Stock, StockItem
 from .forms import StockItemForm
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse
 
 
@@ -47,6 +47,27 @@ class StockItemCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context["stocks"] = Stock.objects.all()
         return context
+
+    def get_success_url(self):
+        return reverse("stock:stock")
+
+
+class StockItemUpdateView(UpdateView):
+    model = StockItem
+    form_class = StockItemForm
+    template_name = "stock/stock_item_update_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["stocks"] = Stock.objects.all()
+        return context
+
+    def get_success_url(self):
+        return reverse("stock:stock")
+
+
+class StockItemDeleteView(DeleteView):
+    model = StockItem
 
     def get_success_url(self):
         return reverse("stock:stock")
