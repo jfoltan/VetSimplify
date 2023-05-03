@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "records.apps.RecordsConfig",
     "stock.apps.StockConfig",
     "widget_tweaks",
+    "procedures.apps.ProceduresConfig",
 ]
 
 MIDDLEWARE = [

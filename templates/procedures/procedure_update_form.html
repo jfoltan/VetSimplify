@@ -1,0 +1,18 @@
+{% extends "_base.html" %}
+{% load crispy_forms_tags %}
+{% block navbar %}
+    {% include "_navbar.html" %}
+{% endblock navbar %}
+{% block title %}
+    Upravit úkon
+{% endblock title %}
+{% block content %}
+    <div class="flex flex-col justify-centermin-h-screen py-4 bg-gray-50 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">Upravit úkon</h2>
+        </div>
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-7xl">
+            <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">{% crispy form %}</div>
+        </div>
+    </div>
+{% endblock content %}
