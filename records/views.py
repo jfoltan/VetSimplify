@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic import (
     ListView,
     DetailView,
@@ -6,10 +6,13 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
-from .forms import OwnerForm, AnimalForm, AnimalCaseForm, VisitForm
+
+from stock.models import StockItem
+from .forms import OwnerForm, AnimalForm, AnimalCaseForm, VisitForm, VisitFormSet
 from .models import Owner, Animal, AnimalCase, Visit
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
+from django.core import serializers
 
 
 class OwnerMixin:
@@ -37,6 +40,12 @@ class VisitMixin(AnimalCaseMixin):
         animal_case = self.get_animalcase()
         visit_id = self.kwargs["visit_id"]
         return get_object_or_404(Visit, animal_case=animal_case, pk=visit_id)
+
+
+def get_animalcase(owner_id, animal_id, animalcase_id):
+    return AnimalCase.objects.get(
+        animal__owner__id=owner_id, animal__id=animal_id, id=animalcase_id
+    )
 
 
 class OwnerListView(ListView):
@@ -219,49 +228,42 @@ class AnimalCaseDeleteView(AnimalCaseMixin, DeleteView):
         )
 
 
-class VisitCreateView(AnimalCaseMixin, CreateView):
-    model = Visit
-    form_class = VisitForm
-    template_name = "records/visit_form.html"
+def visit_create_view(request, owner_id, animal_id, animalcase_id):
+    animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
+    stock_items = StockItem.objects.all()
+    stock_items_json = serializers.serialize(
+        "json", stock_items, fields=("pk", "selling_price")
+    )
 
-    def form_valid(self, form):
-        animal_case = self.get_animalcase()
-        form.instance.animal_case = animal_case
-        return super().form_valid(form)
+    if request.method == "POST":
+        visit_form = VisitForm(request.POST, prefix="visit")
+        formset = VisitFormSet(request.POST, prefix="visit_stock_item")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["animal_case"] = self.get_animalcase()
-        return context
+        if visit_form.is_valid() and formset.is_valid():
+            visit = visit_form.save(commit=False)
+            visit.animal_case = animal_case
+            visit.save()
 
-    def get_success_url(self):
-        return reverse(
-            "records:animal_case_detail",
-            kwargs={
-                "owner_id": self.kwargs["owner_id"],
-                "animal_id": self.kwargs["animal_id"],
-                "animalcase_id": self.kwargs["animalcase_id"],
-            },
-        )
+            formset.instance = visit
+            formset.save()
 
+            return redirect(
+                "records:animal_case_detail",
+                owner_id=owner_id,
+                animal_id=animal_id,
+                animalcase_id=animalcase_id,
+            )
+    else:
+        visit_form = VisitForm(prefix="visit")
+        formset = VisitFormSet(instance=Visit(), prefix="visit_stock_item")
 
-class VisitUpdateView(VisitMixin, UpdateView):
-    model = Visit
-    form_class = VisitForm
-    template_name = "records/visit_update_form.html"
-
-    def get_object(self):
-        return self.get_visit()
-
-    def get_success_url(self):
-        return reverse(
-            "records:animal_case_detail",
-            kwargs={
-                "owner_id": self.kwargs["owner_id"],
-                "animal_id": self.kwargs["animal_id"],
-                "animalcase_id": self.kwargs["animalcase_id"],
-            },
-        )
+    context = {
+        "visit_form": visit_form,
+        "formset": formset,
+        "animal_case": animal_case,
+        "stock_items_json": stock_items_json,
+    }
+    return render(request, "records/visit_form.html", context)
 
 
 class VisitDeleteView(VisitMixin, DeleteView):

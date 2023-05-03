@@ -46,7 +46,7 @@
                 <div class="mt-8">
                     <div class="flex justify-between items-center -my-4">
                         <h2 class="text-xl font-semibold leading-tight">Historie návštěv</h2>
-                        <a href=""
+                        <a href="{% url 'records:visit_create' owner_id=owner.id animal_id=animal.id animalcase_id=animalcase.id %}"
                            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 my-2 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
                             Přidat návštěvu
                         </a>
@@ -56,7 +56,7 @@
                             <li class="mb-10 ml-4">
                                 <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -left-1.5 border border-white dark:bg-gray-700"></div>
                                 <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{ visit.created_at }}
-                                    <a href="{% url 'records:visit_update' owner_id=owner.id animal_id=animal.id animalcase_id=animalcase.id visit_id=visit.id %}"
+                                    <a href=""
                                        class="pl-4 text-blue-500 mr-2 hover:text-blue-300 transition duration-200">
                                         <i class="far fa-edit"></i>
                                     </a>

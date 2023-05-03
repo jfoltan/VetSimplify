@@ -1,7 +1,8 @@
 from django import forms
-from .models import Owner, Animal, AnimalCase, Visit
+from .models import Owner, Animal, AnimalCase, Visit, VisitStockItem
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
+from django.forms.models import inlineformset_factory
 
 
 class OwnerForm(forms.ModelForm):
@@ -160,6 +161,31 @@ class AnimalCaseForm(forms.ModelForm):
         )
 
 
+class VisitStockItemForm(forms.ModelForm):
+    class Meta:
+        model = VisitStockItem
+        fields = [
+            "stock_item",
+            "quantity",
+            "price",
+        ]
+        labels = {
+            "stock_item": "Položka skladu",
+            "quantity": "Množství",
+            "price": "Cena",
+        }
+
+
+VisitFormSet = inlineformset_factory(
+    Visit,
+    VisitStockItem,
+    form=VisitStockItemForm,
+    extra=0,
+    can_delete=True,
+    fields=("stock_item", "quantity", "price"),
+)
+
+
 class VisitForm(forms.ModelForm):
     class Meta:
         model = Visit
@@ -174,19 +200,20 @@ class VisitForm(forms.ModelForm):
             "record": "Záznam",
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div(
-                Div("weight", css_class="col-span-2"),
-                Div("temperature", css_class="col-span-2"),
-                Div("record", css_class="col-span-6"),
-                css_class="grid gap-4 grid-cols-6",
-            ),
-            Submit(
-                "submit",
-                "Uložit",
-                css_class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800",
-            ),
-        )
+
+# def __init__(self, *args, **kwargs):
+#     super().__init__(*args, **kwargs)
+#     self.helper = FormHelper()
+#     self.helper.layout = Layout(
+#         Div(
+#             Div("weight", css_class="col-span-2"),
+#             Div("temperature", css_class="col-span-2"),
+#             Div("record", css_class="col-span-6"),
+#             css_class="grid gap-4 grid-cols-6",
+#         ),
+#         Submit(
+#             "submit",
+#             "Uložit",
+#             css_class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800",
+#         ),
+#     )

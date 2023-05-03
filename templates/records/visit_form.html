@@ -12,7 +12,105 @@
             <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">Přidat návštěvu</h2>
         </div>
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-7xl">
-            <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">{% crispy form %}</div>
+            <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ visit_form.as_p }}
+                    {{ formset.management_form }}
+                    <div id="form-set">
+                        {% for form in formset %}{{ form.as_table }}{% endfor %}
+                    </div>
+                    <button type="button" id="add-button">Přidat položku</button>
+                    <br>
+                    <button type="submit">Uložit</button>
+                </form>
+            </div>
         </div>
     </div>
+    <script>
+        const addButton = document.getElementById('add-button');
+        let formIdx = {{ formset|length }};
+        const formSet = document.getElementById('form-set');
+        const totalForms = document.querySelector("#id_visit_stock_item-TOTAL_FORMS");
+    
+        function updatePrice(event) {
+            const stockItems = JSON.parse('{{ stock_items_json|escapejs }}');
+            const formsetDiv = event.target.closest('div');
+            const targetStockItemSelect = formsetDiv.querySelector('[name$="-stock_item"]');
+            const targetPriceInput = formsetDiv.querySelector('[name$="-price"]');
+            const targetQuantityInput = formsetDiv.querySelector('[name$="-quantity"]');
+    
+            const selectedStockItem = stockItems.find(item => item.pk == targetStockItemSelect.value);
+    
+            if (selectedStockItem) {
+                const quantity = parseFloat(targetQuantityInput.value) || 1;
+                targetPriceInput.value = selectedStockItem.fields.selling_price * quantity;
+            } else {
+                targetPriceInput.value = '';
+            }
+        }
+    
+        function setDefaultQuantity() {
+            const quantityInputs = document.querySelectorAll('[name$="-quantity"]');
+            quantityInputs.forEach(input => {
+                if (!input.value) {
+                    input.value = 1;
+                }
+            });
+        }
+    
+        function bindSelectEvent() {
+            const stockItemSelects = document.querySelectorAll('[name$="-stock_item"]');
+            const quantityInputs = document.querySelectorAll('[name$="-quantity"]');
+    
+            stockItemSelects.forEach(select => {
+                select.removeEventListener('change', updatePrice);
+                select.addEventListener('change', updatePrice);
+            });
+    
+            quantityInputs.forEach(input => {
+                input.removeEventListener('input', updatePrice);
+                input.addEventListener('input', updatePrice);
+            });
+        }
+    
+        function addRemoveButton(form) {
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Odstranit';
+            removeButton.type = 'button';
+            removeButton.classList.add('remove-button');
+            removeButton.addEventListener('click', () => {
+                formSet.removeChild(form);
+                formIdx--;
+                totalForms.setAttribute('value', `${formIdx}`);
+            });
+            form.appendChild(removeButton);
+        }
+    
+        function addRemoveButtonsToExistingForms() {
+            const forms = formSet.querySelectorAll('div');
+            forms.forEach(form => addRemoveButton(form));
+        }
+    
+        function createFormDiv(html) {
+            const newForm = document.createElement('div');
+            newForm.innerHTML = html;
+            return newForm;
+        }
+    
+        addButton.addEventListener('click', () => {
+            const formHTML = `{{ formset.empty_form.as_table|escapejs }}`.replace(/__prefix__/g, formIdx);
+            const newForm = createFormDiv(formHTML);
+            formSet.appendChild(newForm);
+            formIdx++;
+            totalForms.setAttribute('value', `${formIdx}`);
+            bindSelectEvent();
+            setDefaultQuantity();
+            addRemoveButton(newForm);
+        });
+    
+        bindSelectEvent();
+        setDefaultQuantity();
+        addRemoveButtonsToExistingForms();
+    </script>
 {% endblock content %}

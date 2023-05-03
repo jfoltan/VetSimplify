@@ -102,3 +102,12 @@ class Visit(models.Model):
 
     def __str__(self):
         return f"Návštěva {self.created_at} ({self.animal_case.animal.name})"
+
+
+class VisitStockItem(models.Model):
+    visit = models.ForeignKey(
+        Visit, on_delete=models.CASCADE, related_name="stock_items"
+    )
+    stock_item = models.ForeignKey("stock.StockItem", on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
