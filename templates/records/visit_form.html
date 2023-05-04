@@ -96,6 +96,7 @@
                             class="mt-8 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                         Uložit
                     </button>
+                    <button type="submit" name="generate_pdf">Vygenerovat PDF fakturu</button>
                 </form>
             </div>
         </div>
@@ -108,7 +109,7 @@
     
         function updatePrice(event) {
             const stockItems = JSON.parse('{{ stock_items_json|escapejs }}');
-            const formsetDiv = event.target.closest('div');
+            const formsetDiv = event.target.closest('tr');
             const targetStockItemSelect = formsetDiv.querySelector('[name$="-stock_item"]');
             const targetPriceInput = formsetDiv.querySelector('[name$="-price"]');
             const targetQuantityInput = formsetDiv.querySelector('[name$="-quantity"]');

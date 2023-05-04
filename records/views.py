@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views.generic import (
     ListView,
@@ -274,12 +275,19 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
                 stock_item.units_in_stock -= quantity
                 stock_item.save()
 
-            return redirect(
-                "records:animal_case_detail",
-                owner_id=owner_id,
-                animal_id=animal_id,
-                animalcase_id=animalcase_id,
-            )
+            if "generate_pdf" in request.POST:
+                response = HttpResponseRedirect(
+                    reverse("accounting:generate_invoice", args=[visit.pk])
+                )
+                response["Location"] += "?generate_pdf"
+                return response
+            else:
+                return redirect(
+                    "records:animal_case_detail",
+                    owner_id=owner_id,
+                    animal_id=animal_id,
+                    animalcase_id=animalcase_id,
+                )
     else:
         visit_form = VisitForm(prefix="visit")
         formset = VisitFormSet(instance=Visit(), prefix="visit_stock_item")

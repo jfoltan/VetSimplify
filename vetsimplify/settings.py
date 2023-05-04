@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "stock.apps.StockConfig",
     "widget_tweaks",
     "procedures.apps.ProceduresConfig",
+    "accounting.apps.AccountingConfig",
 ]
 
 MIDDLEWARE = [
