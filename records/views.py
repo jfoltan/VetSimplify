@@ -300,6 +300,8 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
 
 def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
     animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
+    owner = get_object_or_404(Owner, pk=owner_id)
+    animal = get_object_or_404(Animal, pk=animal_id)
     visit = get_object_or_404(Visit, pk=visit_id)
     stock_items = StockItem.objects.all()
     stock_items_json = serializers.serialize(
@@ -352,6 +354,8 @@ def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
         "stock_items_json": stock_items_json,
         "procedures_json": procedures_json,
         "procedure_formset": procedure_formset,
+        "owner": owner,
+        "animal": animal,
     }
     return render(request, "records/visit_update_form.html", context)
 

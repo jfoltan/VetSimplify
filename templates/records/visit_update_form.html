@@ -5,12 +5,14 @@
     {% include "_navbar.html" %}
 {% endblock navbar %}
 {% block title %}
-    {{ animal_case.name }} - Přidat návštěvu
+    {{ animal_case.name }} - Upravit návštěvu
 {% endblock title %}
 {% block content %}
     <div class="flex flex-col justify-centermin-h-screen py-4 bg-gray-200 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">Přidat návštěvu</h2>
+            <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">
+                Upravit návštěvu - {{ owner.first_name }} {{ owner.last_name }} | {{ animal.name }}, {{ animal.get_animal_type_display }} | {{ animal_case.name }}
+            </h2>
         </div>
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-7xl">
             <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
@@ -100,8 +102,14 @@
                         Přidat úkon
                     </button>
                     <br>
+                    <div class="grid grid-cols-12">
+                        <div class="bg-green-300 rounded-md px-2 py-2 col-span-2">
+                            <h3 class="text-lg font-semibold">Celková cena:</h3>
+                            <span id="total-price">0</span><span>&nbspKč</span>
+                        </div>
+                    </div>
                     <button type="submit"
-                            class="mt-8 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                            class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                         Uložit
                     </button>
                 </form>
@@ -116,7 +124,7 @@
     
         function updatePrice(event) {
             const stockItems = JSON.parse('{{ stock_items_json|escapejs }}');
-            const formsetDiv = event.target.closest('div');
+            const formsetDiv = event.target.closest('tr');
             const targetStockItemSelect = formsetDiv.querySelector('[name$="-stock_item"]');
             const targetPriceInput = formsetDiv.querySelector('[name$="-price"]');
             const targetQuantityInput = formsetDiv.querySelector('[name$="-quantity"]');
@@ -129,6 +137,7 @@
             } else {
                 targetPriceInput.value = '';
             }
+            updateTotalDisplay();
         }
     
         function setDefaultQuantity() {
@@ -153,6 +162,7 @@
                 input.removeEventListener('input', updatePrice);
                 input.addEventListener('input', updatePrice);
             });
+            updateTotalDisplay();
         }
     
         function addRemoveButton(row) {
@@ -169,6 +179,7 @@
                 formSet.removeChild(row);
                 formIdx--;
                 totalForms.setAttribute('value', `${formIdx}`);
+                updateTotalDisplay();
             });
             const removeButtonCell = document.createElement('td');
             removeButtonCell.appendChild(removeButton);
@@ -205,9 +216,10 @@
             formSet.appendChild(newRow);
             formIdx++;
             totalForms.setAttribute('value', `${formIdx}`);
-            bindSelectEvent();
             setDefaultQuantity();
             addRemoveButton(newRow);
+            bindSelectEvent();
+            updateTotalDisplay();
         });
 
         const addProcedureButton = document.getElementById('add-procedure-button');
@@ -228,6 +240,7 @@
             } else {
                 targetPriceInput.value = '';
             }
+            updateTotalDisplay();
         }
 
         function bindProcedureSelectEvent() {
@@ -237,6 +250,7 @@
                 select.removeEventListener('change', updateProcedurePrice);
                 select.addEventListener('change', updateProcedurePrice);
             });
+            updateTotalDisplay();
         }
 
         function addProcedureRemoveButton(row) {
@@ -253,6 +267,7 @@
                 procedureFormSet.removeChild(row);
                 procedureFormIdx--;
                 totalProcedureForms.setAttribute('value', `${procedureFormIdx}`);
+                updateTotalDisplay();
             });
             const removeButtonCell = document.createElement('td');
             removeButtonCell.appendChild(removeButton);
@@ -283,10 +298,41 @@
             totalProcedureForms.setAttribute('value', `${procedureFormIdx}`);
             addProcedureRemoveButton(newRow);
             bindProcedureSelectEvent();
+            updateTotalDisplay();
         });
+
+        function calculateTotal() {
+            const itemPriceInputs = document.querySelectorAll('#form-set [name$="-price"]');
+            const procedurePriceInputs = document.querySelectorAll('#procedure-form-set [name$="-price"]');
+        
+            let total = 0;
+        
+            itemPriceInputs.forEach(input => {
+                const value = parseFloat(input.value);
+                if (!isNaN(value)) {
+                    total += value;
+                }
+            });
+        
+            procedurePriceInputs.forEach(input => {
+                const value = parseFloat(input.value);
+                if (!isNaN(value)) {
+                    total += value;
+                }
+            });
+        
+            return total;
+        }
+
+        function updateTotalDisplay() {
+            const totalPriceElement = document.getElementById('total-price');
+            const total = calculateTotal();
+            totalPriceElement.textContent = total.toFixed(2);
+        }
     
         bindSelectEvent();
         setDefaultQuantity();
         bindProcedureSelectEvent();
+        updateTotalDisplay();
     </script>
 {% endblock content %}

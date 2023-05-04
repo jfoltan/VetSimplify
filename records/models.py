@@ -97,11 +97,18 @@ class Visit(models.Model):
     weight = models.FloatField(blank=True, null=True)
     temperature = models.FloatField(blank=True, null=True)
     record = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Návštěva {self.created_at} ({self.animal_case.animal.name})"
+
+    def calculate_price(self):
+        stock_items_total = sum(item.price for item in self.stock_items.all())
+        procedures_total = sum(procedure.price for procedure in self.procedures.all())
+        self.price = stock_items_total + procedures_total
+        self.save()
 
 
 class VisitStockItem(models.Model):
@@ -112,6 +119,14 @@ class VisitStockItem(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.visit.calculate_price()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.visit.calculate_price()
+
 
 class VisitProcedure(models.Model):
     visit = models.ForeignKey(
@@ -119,3 +134,11 @@ class VisitProcedure(models.Model):
     )
     procedure = models.ForeignKey("procedures.Procedure", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.visit.calculate_price()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.visit.calculate_price()
