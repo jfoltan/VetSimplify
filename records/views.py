@@ -298,6 +298,64 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
     return render(request, "records/visit_form.html", context)
 
 
+def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
+    animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
+    visit = get_object_or_404(Visit, pk=visit_id)
+    stock_items = StockItem.objects.all()
+    stock_items_json = serializers.serialize(
+        "json", stock_items, fields=("pk", "selling_price")
+    )
+    procedures = Procedure.objects.all()
+    procedures_json = serializers.serialize("json", procedures, fields=("pk", "price"))
+
+    if request.method == "POST":
+        visit_form = VisitForm(request.POST, instance=visit, prefix="visit")
+        formset = VisitFormSet(request.POST, instance=visit, prefix="visit_stock_item")
+        procedure_formset = VisitProcedureFormSet(
+            request.POST, instance=visit, prefix="visit_procedure"
+        )
+
+        if (
+            visit_form.is_valid()
+            and formset.is_valid()
+            and procedure_formset.is_valid()
+        ):
+            visit_form.save()
+            formset.save()
+            procedure_formset.save()
+
+            for form in formset.forms:
+                stock_item = form.cleaned_data.get("stock_item")
+                quantity = form.cleaned_data.get("quantity")
+
+                if stock_item and quantity:
+                    stock_item.units_in_stock -= quantity
+                    stock_item.save()
+
+            return redirect(
+                "records:animal_case_detail",
+                owner_id=owner_id,
+                animal_id=animal_id,
+                animalcase_id=animalcase_id,
+            )
+    else:
+        visit_form = VisitForm(instance=visit, prefix="visit")
+        formset = VisitFormSet(instance=visit, prefix="visit_stock_item")
+        procedure_formset = VisitProcedureFormSet(
+            instance=visit, prefix="visit_procedure"
+        )
+
+    context = {
+        "visit_form": visit_form,
+        "formset": formset,
+        "animal_case": animal_case,
+        "stock_items_json": stock_items_json,
+        "procedures_json": procedures_json,
+        "procedure_formset": procedure_formset,
+    }
+    return render(request, "records/visit_update_form.html", context)
+
+
 def visit_delete_view(request, owner_id, animal_id, animalcase_id, visit_id):
     animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
     visit = get_object_or_404(Visit, pk=visit_id, animal_case=animal_case)

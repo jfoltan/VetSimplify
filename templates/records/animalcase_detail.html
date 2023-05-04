@@ -56,7 +56,7 @@
                             <li class="mb-10 ml-4">
                                 <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -left-1.5 border border-white dark:bg-gray-700"></div>
                                 <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{ visit.created_at }}
-                                    <a href=""
+                                    <a href="{% url 'records:visit_update' owner_id=owner.id animal_id=animal.id animalcase_id=animalcase.id visit_id=visit.id %}"
                                        class="pl-4 text-blue-500 mr-2 hover:text-blue-300 transition duration-200">
                                         <i class="far fa-edit"></i>
                                     </a>

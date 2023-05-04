@@ -181,7 +181,7 @@ VisitFormSet = inlineformset_factory(
     VisitStockItem,
     form=VisitStockItemForm,
     extra=0,
-    can_delete=False,
+    can_delete=True,
     fields=("stock_item", "quantity", "price"),
 )
 
@@ -233,6 +233,6 @@ VisitProcedureFormSet = inlineformset_factory(
     VisitProcedure,
     form=VisitProcedureForm,
     extra=0,
-    can_delete=False,
+    can_delete=True,
     fields=("procedure", "price"),
 )
