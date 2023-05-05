@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views.generic import (
     ListView,
@@ -7,6 +7,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
+from accounting.models import Invoice
+from accounting.views import generate_invoice
 
 from stock.models import StockItem
 from procedures.models import Procedure
@@ -276,17 +278,27 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
                 stock_item.save()
 
             if "generate_pdf" in request.POST:
-                response = HttpResponseRedirect(
-                    reverse("accounting:generate_invoice", args=[visit.pk])
-                )
-                response["Location"] += "?generate_pdf"
+                buffer = generate_invoice(visit.pk)
+
+                # Ukládání PDF do databáze
+                content = buffer.read()
+                invoice = Invoice(visit=visit, content=content)
+                invoice.save()
+
+                response = HttpResponse(content_type="application/pdf")
+                response.write(content)
+                response[
+                    "Content-Disposition"
+                ] = f"attachment; filename=faktura-{visit.pk}.pdf"
+                response["X-Visit-Id"] = visit.pk
                 return response
             else:
                 return redirect(
-                    "records:animal_case_detail",
+                    "records:visit_update",
                     owner_id=owner_id,
                     animal_id=animal_id,
                     animalcase_id=animalcase_id,
+                    visit_id=visit.pk,
                 )
     else:
         visit_form = VisitForm(prefix="visit")
@@ -295,6 +307,16 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
             instance=Visit(), prefix="visit_procedure"
         )
 
+    default_update_view_url = reverse(
+        "records:visit_update",
+        kwargs={
+            "owner_id": owner_id,
+            "animal_id": animal_id,
+            "animalcase_id": animalcase_id,
+            "visit_id": 0,
+        },
+    )
+
     context = {
         "visit_form": visit_form,
         "formset": formset,
@@ -302,6 +324,7 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
         "stock_items_json": stock_items_json,
         "procedures_json": procedures_json,
         "procedure_formset": procedure_formset,
+        "default_update_view_url": default_update_view_url,
     }
     return render(request, "records/visit_form.html", context)
 

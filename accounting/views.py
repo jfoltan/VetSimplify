@@ -6,15 +6,17 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 
 from records.models import Visit
+from .models import Invoice
 
 
-def generate_invoice(request, visit_id):
+def generate_invoice(visit_id):
     visit = get_object_or_404(Visit, pk=visit_id)
 
     # Zde můžete nastavit vlastnosti PDF, jako je název, fonty atd.
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
     pdf.setTitle("Faktura návštěvy")
+    pdf.setFont("Helvetica", 12)
 
     # Zde můžete přidat obsah faktury, jako je seznam položek a úkonů
     y = 800
@@ -34,16 +36,4 @@ def generate_invoice(request, visit_id):
     pdf.save()
 
     buffer.seek(0)
-    if "generate_pdf" in request.GET:
-        return FileResponse(buffer, as_attachment=True, filename="faktura.pdf")
-    else:
-        return HttpResponseRedirect(
-            reverse(
-                "records:animal_case_detail",
-                args=[
-                    visit.animal_case.owner.pk,
-                    visit.animal_case.animal.pk,
-                    visit.animal_case.pk,
-                ],
-            )
-        )
+    return buffer
