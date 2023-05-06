@@ -365,6 +365,25 @@ def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
                     stock_item.units_in_stock -= quantity
                     stock_item.save()
 
+            if "generate_pdf" in request.POST:
+                # Smažte starou fakturu, pokud existuje
+                Invoice.objects.filter(visit=visit).delete()
+
+                buffer = generate_invoice(visit.pk)
+
+                # Ukládání PDF do databáze
+                content = buffer.read()
+                invoice = Invoice(visit=visit, content=content)
+                invoice.save()
+
+                response = HttpResponse(content_type="application/pdf")
+                response.write(content)
+                response[
+                    "Content-Disposition"
+                ] = f"attachment; filename=faktura-{visit.pk}.pdf"
+                response["X-Visit-Id"] = visit.pk
+                return response
+
             return redirect(
                 "records:animal_case_detail",
                 owner_id=owner_id,

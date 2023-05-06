@@ -88,15 +88,22 @@
                         Přidat úkon
                     </button>
                     <br>
-                    <div>
-                        <h3 class="text-lg">Celková cena:</h3>
-                        <span id="total-price">0</span>
+                    <div class="grid grid-cols-12 mt-4">
+                        <div class="bg-green-300 rounded-md px-2 py-2 col-span-2">
+                            <h3 class="text-lg font-semibold">Celková cena:</h3>
+                            <span id="total-price">0</span><span>&nbspKč</span>
+                        </div>
                     </div>
                     <button type="submit"
                             class="mt-8 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                         Uložit
                     </button>
-                    <button type="submit" name="generate_pdf" id="generate-pdf-btn">Vygenerovat PDF fakturu</button>
+                    <button type="submit"
+                            name="generate_pdf"
+                            id="generate-pdf-btn"
+                            class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
+                        Vygenerovat PDF fakturu
+                    </button>
                 </form>
             </div>
         </div>

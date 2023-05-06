@@ -112,11 +112,57 @@
                             class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                         Uložit
                     </button>
+                    <button type="submit"
+                            name="generate_pdf"
+                            id="generate-pdf-btn"
+                            class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">
+                        Vygenerovat PDF fakturu
+                    </button>
                 </form>
             </div>
         </div>
     </div>
     <script>
+        document.getElementById("generate-pdf-btn").addEventListener("click", function (event) {
+            event.preventDefault();
+            const form = document.querySelector("form");
+            const formData = new FormData(form);
+            formData.set("generate_pdf", "1");
+        
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "{{ request.path }}", true);
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhr.responseType = "blob";
+        
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    const visitId = this.getResponseHeader("X-Visit-Id");
+                    const blob = new Blob([this.response], { type: "application/pdf" });
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, "_blank");
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+        
+                    if (visitId) {
+                        const updateViewUrl = "{{ default_update_view_url }}".replace("0", visitId);
+                        setTimeout(() => {
+                            window.location.href = updateViewUrl;
+                        }, 500); // zpoždění přesměrování, aby se stihl otevřít PDF
+                    }
+                } else {
+                    console.error("Error generating PDF:", this.statusText);
+                }
+            };
+        
+            xhr.onerror = function () {
+                console.error("Error generating PDF:", this.statusText);
+            };
+        
+            xhr.send(formData);
+        }); 
+
+
         const addButton = document.getElementById('add-button');
         let formIdx = {{ formset|length }};
         const formSet = document.getElementById('form-set');
