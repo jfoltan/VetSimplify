@@ -24,6 +24,8 @@ from .models import Owner, Animal, AnimalCase, Visit
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.core import serializers
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
 class OwnerMixin:
@@ -59,11 +61,11 @@ def get_animalcase(owner_id, animal_id, animalcase_id):
     )
 
 
-class OwnerListView(ListView):
+class OwnerListView(LoginRequiredMixin, ListView):
     model = Owner
 
 
-class OwnerDetailView(OwnerMixin, DetailView):
+class OwnerDetailView(LoginRequiredMixin, OwnerMixin, DetailView):
     model = Owner
 
     def get_object(self):
@@ -75,7 +77,7 @@ class OwnerDetailView(OwnerMixin, DetailView):
         return context
 
 
-class OwnerCreateView(CreateView):
+class OwnerCreateView(LoginRequiredMixin, CreateView):
     model = Owner
     form_class = OwnerForm
     template_name = "records/owner_form.html"
@@ -84,7 +86,7 @@ class OwnerCreateView(CreateView):
         return reverse("records:owner_detail", kwargs={"owner_id": self.object.pk})
 
 
-class OwnerUpdateView(OwnerMixin, UpdateView):
+class OwnerUpdateView(LoginRequiredMixin, OwnerMixin, UpdateView):
     model = Owner
     form_class = OwnerForm
     template_name = "records/owner_update_form.html"
@@ -96,7 +98,7 @@ class OwnerUpdateView(OwnerMixin, UpdateView):
         return reverse("records:owner_detail", kwargs={"owner_id": self.object.pk})
 
 
-class OwnerDeleteView(OwnerMixin, DeleteView):
+class OwnerDeleteView(LoginRequiredMixin, OwnerMixin, DeleteView):
     model = Owner
 
     def get_object(self):
@@ -106,7 +108,7 @@ class OwnerDeleteView(OwnerMixin, DeleteView):
         return reverse("records:owner_list")
 
 
-class AnimalCreateView(OwnerMixin, CreateView):
+class AnimalCreateView(LoginRequiredMixin, OwnerMixin, CreateView):
     model = Animal
     form_class = AnimalForm
     template_name = "records/animal_form.html"
@@ -127,7 +129,7 @@ class AnimalCreateView(OwnerMixin, CreateView):
         )
 
 
-class AnimalDetailView(AnimalMixin, DetailView):
+class AnimalDetailView(LoginRequiredMixin, AnimalMixin, DetailView):
     model = Animal
 
     def get_object(self):
@@ -140,7 +142,7 @@ class AnimalDetailView(AnimalMixin, DetailView):
         return context
 
 
-class AnimalUpdateView(AnimalMixin, UpdateView):
+class AnimalUpdateView(LoginRequiredMixin, AnimalMixin, UpdateView):
     model = Animal
     form_class = AnimalForm
     template_name = "records/animal_update_form.html"
@@ -154,7 +156,7 @@ class AnimalUpdateView(AnimalMixin, UpdateView):
         )
 
 
-class AnimalDeleteView(AnimalMixin, DeleteView):
+class AnimalDeleteView(LoginRequiredMixin, AnimalMixin, DeleteView):
     model = Animal
 
     def get_object(self):
@@ -166,7 +168,7 @@ class AnimalDeleteView(AnimalMixin, DeleteView):
         )
 
 
-class AnimalCaseCreateView(AnimalMixin, CreateView):
+class AnimalCaseCreateView(LoginRequiredMixin, AnimalMixin, CreateView):
     model = AnimalCase
     form_class = AnimalCaseForm
     template_name = "records/animalcase_form.html"
@@ -191,7 +193,7 @@ class AnimalCaseCreateView(AnimalMixin, CreateView):
         )
 
 
-class AnimalCaseDetailView(AnimalCaseMixin, DetailView):
+class AnimalCaseDetailView(LoginRequiredMixin, AnimalCaseMixin, DetailView):
     model = AnimalCase
 
     def get_object(self):
@@ -205,7 +207,7 @@ class AnimalCaseDetailView(AnimalCaseMixin, DetailView):
         return context
 
 
-class AnimalCaseUpdateView(AnimalCaseMixin, UpdateView):
+class AnimalCaseUpdateView(LoginRequiredMixin, AnimalCaseMixin, UpdateView):
     model = AnimalCase
     form_class = AnimalCaseForm
     template_name = "records/animalcase_update_form.html"
@@ -223,7 +225,7 @@ class AnimalCaseUpdateView(AnimalCaseMixin, UpdateView):
         )
 
 
-class AnimalCaseDeleteView(AnimalCaseMixin, DeleteView):
+class AnimalCaseDeleteView(LoginRequiredMixin, AnimalCaseMixin, DeleteView):
     model = AnimalCase
 
     def get_object(self):
@@ -239,6 +241,7 @@ class AnimalCaseDeleteView(AnimalCaseMixin, DeleteView):
         )
 
 
+@login_required
 def visit_create_view(request, owner_id, animal_id, animalcase_id):
     animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
     stock_items = StockItem.objects.all()
@@ -329,6 +332,7 @@ def visit_create_view(request, owner_id, animal_id, animalcase_id):
     return render(request, "records/visit_form.html", context)
 
 
+@login_required
 def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
     animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
     owner = get_object_or_404(Owner, pk=owner_id)
@@ -410,6 +414,7 @@ def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
     return render(request, "records/visit_update_form.html", context)
 
 
+@login_required
 def visit_delete_view(request, owner_id, animal_id, animalcase_id, visit_id):
     animal_case = get_animalcase(owner_id, animal_id, animalcase_id)
     visit = get_object_or_404(Visit, pk=visit_id, animal_case=animal_case)

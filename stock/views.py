@@ -3,8 +3,11 @@ from .models import Stock, StockItem
 from .forms import StockItemForm
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def stock(request, stock_id=None):
     items = StockItem.objects.all()
 
@@ -38,7 +41,7 @@ def stock(request, stock_id=None):
     return render(request, "stock/stock_items.html", context)
 
 
-class StockItemCreateView(CreateView):
+class StockItemCreateView(LoginRequiredMixin, CreateView):
     model = StockItem
     form_class = StockItemForm
     template_name = "stock/stock_item_form.html"
@@ -52,7 +55,7 @@ class StockItemCreateView(CreateView):
         return reverse("stock:stock")
 
 
-class StockItemUpdateView(UpdateView):
+class StockItemUpdateView(LoginRequiredMixin, UpdateView):
     model = StockItem
     form_class = StockItemForm
     template_name = "stock/stock_item_update_form.html"
@@ -66,7 +69,7 @@ class StockItemUpdateView(UpdateView):
         return reverse("stock:stock")
 
 
-class StockItemDeleteView(DeleteView):
+class StockItemDeleteView(LoginRequiredMixin, DeleteView):
     model = StockItem
 
     def get_success_url(self):

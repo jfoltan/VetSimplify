@@ -13,8 +13,11 @@ from django.views.generic import ListView
 
 from records.models import Visit
 from .models import Invoice
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def generate_invoice(visit_id):
     visit = get_object_or_404(Visit, pk=visit_id)
     owner = visit.animal_case.animal.owner
@@ -114,7 +117,7 @@ def generate_invoice(visit_id):
     return buffer
 
 
-class InvoiceListView(ListView):
+class InvoiceListView(LoginRequiredMixin, ListView):
     model = Invoice
     template_name = "accounting/invoice_list.html"
     context_object_name = "invoices"
@@ -123,6 +126,7 @@ class InvoiceListView(ListView):
         return Invoice.objects.order_by("-generated_at")
 
 
+@login_required
 def invoice_pdf_view(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     buffer = BytesIO(invoice.content)
