@@ -31,21 +31,24 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django built-in apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # My custom apps
     "frontend_pages.apps.FrontendPagesConfig",
-    "crispy_forms",
-    "crispy_tailwind",
     "accounts.apps.AccountsConfig",
     "records.apps.RecordsConfig",
     "stock.apps.StockConfig",
-    "widget_tweaks",
     "procedures.apps.ProceduresConfig",
     "accounting.apps.AccountingConfig",
+    # Third party apps
+    "crispy_forms",
+    "crispy_tailwind",
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [
