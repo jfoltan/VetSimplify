@@ -63,6 +63,7 @@ def get_animalcase(owner_id, animal_id, animalcase_id):
 
 class OwnerListView(LoginRequiredMixin, ListView):
     model = Owner
+    paginate_by = 10
 
 
 class OwnerDetailView(LoginRequiredMixin, OwnerMixin, DetailView):
