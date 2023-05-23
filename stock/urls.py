@@ -1,5 +1,11 @@
 from django.urls import path
-from .views import stock, StockItemCreateView, StockItemUpdateView, StockItemDeleteView
+from .views import (
+    stock,
+    StockItemCreateView,
+    StockItemUpdateView,
+    StockItemDeleteView,
+    StockCreateView,
+)
 
 app_name = "stock"
 
@@ -14,4 +20,5 @@ urlpatterns = [
         "item_delete/<int:pk>", StockItemDeleteView.as_view(), name="stock_item_delete"
     ),
     # path("item/<int:item_id>", item_detail, name="item_detail"),
+    path("create", StockCreateView.as_view(), name="stock_create"),
 ]

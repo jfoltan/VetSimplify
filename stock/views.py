@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Stock, StockItem
-from .forms import StockItemForm
+from .forms import StockItemForm, StockForm
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -39,6 +39,15 @@ def stock(request, stock_id=None):
     }
 
     return render(request, "stock/stock_items.html", context)
+
+
+class StockCreateView(LoginRequiredMixin, CreateView):
+    model = Stock
+    form_class = StockForm
+    template_name = "stock/stock_form.html"
+
+    def get_success_url(self):
+        return reverse("stock:stock")
 
 
 class StockItemCreateView(LoginRequiredMixin, CreateView):

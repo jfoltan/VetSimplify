@@ -1,5 +1,5 @@
 from django import forms
-from .models import StockItem
+from .models import StockItem, Stock
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
 
@@ -60,6 +60,38 @@ class StockItemForm(forms.ModelForm):
                 Div("selling_price", css_class="col-span-1"),
                 Div("note", css_class="col-span-6"),
                 css_class="grid gap-4 grid-cols-6",
+            ),
+            Submit(
+                "submit",
+                "Uložit",
+                css_class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800",
+            ),
+        )
+
+
+class StockForm(forms.ModelForm):
+    class Meta:
+        model = Stock
+        fields = [
+            "name",
+            "margin",
+            "note",
+        ]
+        labels = {
+            "name": "Název",
+            "margin": "Marže",
+            "note": "Poznámka",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div(
+                Div("name", css_class="col-span-3"),
+                Div("margin", css_class="col-span-1"),
+                Div("note", css_class="col-span-4"),
+                css_class="grid gap-4 grid-cols-4",
             ),
             Submit(
                 "submit",
