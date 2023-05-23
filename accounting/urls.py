@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import generate_invoice, InvoiceListView, invoice_pdf_view
+from .views import (
+    generate_invoice,
+    InvoiceListView,
+    invoice_pdf_view,
+    download_invoices,
+)
 
 app_name = "accounting"
 
@@ -11,4 +16,5 @@ urlpatterns = [
     ),
     path("", InvoiceListView.as_view(), name="invoice_list"),
     path("invoices/<int:pk>/pdf/", invoice_pdf_view, name="invoice_pdf"),
+    path("invoices/download/", download_invoices, name="download_invoices"),
 ]

@@ -8,8 +8,23 @@
 {% block content %}
     <div class="container mx-auto px-4 sm:px-8">
         <div class="py-8">
-            <div class="flex justify-between items-center -my-4">
+            <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold">Faktury</h2>
+                <div class="flex justify-between items-center -my-4">
+                    <h2 class="text-xl font-semibold mr-4">Export faktur:</h2>
+                    <form action="{% url 'accounting:download_invoices' %}"
+                          method="get"
+                          class="flex items-center">
+                        <label for="start_date" class="mr-2">Období od:</label>
+                        <input type="date" id="start_date" name="start_date" class="mr-4">
+                        <label for="end_date" class="mr-2">do:</label>
+                        <input type="date" id="end_date" name="end_date" class="mr-4">
+                        <button type="submit"
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
+                            Stáhnout faktury
+                        </button>
+                    </form>
+                </div>
             </div>
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
                 <div class="inline-block min-w-full shadow-md rounded-lg overflow-hidden">

@@ -1,6 +1,7 @@
 import os
+import zipfile
 from django.conf import settings
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -10,6 +11,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from django.views.generic import ListView
+from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 from records.models import Visit
 from .models import Invoice
@@ -29,7 +33,7 @@ def generate_invoice(visit_id):
         settings.BASE_DIR, "static", "fonts", "DejaVuSans-Bold.ttf"
     )
     pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", font_path_bold))
-    # Zde můžete nastavit vlastnosti PDF, jako je název, fonty atd.
+
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
     pdf.setTitle("Faktura návštěvy")
@@ -134,4 +138,45 @@ def invoice_pdf_view(request, pk):
     response[
         "Content-Disposition"
     ] = f"inline; filename=faktura-{invoice.generated_at.year}{invoice.visit.pk:06}.pdf"
+    return response
+
+
+@login_required
+def download_invoices(request):
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    if start_date is None or end_date is None:
+        return HttpResponse("Missing start_date or end_date parameter.", status=400)
+
+    try:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return HttpResponse("Incorrect data format, should be YYYY-MM-DD", status=400)
+
+    invoices = Invoice.objects.filter(
+        Q(generated_at__gte=start_date) & Q(generated_at__lte=end_date)
+    )
+
+    zip_filename = (
+        f"faktury_{start_date.strftime('%Y-%m-%d')}_{end_date.strftime('%Y-%m-%d')}.zip"
+    )
+    zip_path = os.path.join(settings.MEDIA_ROOT, zip_filename)
+
+    # Vytvoření složky MEDIA_ROOT, pokud neexistuje
+    os.makedirs(os.path.dirname(zip_path), exist_ok=True)
+
+    with zipfile.ZipFile(zip_path, "w") as zip_file:
+        for invoice in invoices:
+            pdf_content = invoice.content  # předpokládám, že 'content' je BinaryField
+            pdf_filename = f"faktura_{invoice.visit.pk}_{invoice.generated_at.strftime('%Y-%m-%d')}.pdf"
+            zip_file.writestr(pdf_filename, pdf_content)
+
+    zip_file = open(zip_path, "rb")
+
+    response = FileResponse(zip_file)
+    response["Content-Type"] = "application/zip"
+    response["Content-Disposition"] = f"attachment; filename={zip_filename}"
+
     return response
