@@ -5,6 +5,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 @login_required
@@ -30,7 +31,17 @@ def stock(request, stock_id=None):
         unique_type: type_choices_dict[unique_type] for unique_type in unique_types
     }
 
+    page = request.GET.get("page", 1)
+    paginator = Paginator(items, 10)
+    try:
+        items_paged = paginator.page(page)
+    except PageNotAnInteger:
+        items_paged = paginator.page(1)
+    except EmptyPage:
+        items_paged = paginator.page(paginator.num_pages)
+
     context = {
+        "items_paged": items_paged,
         "items": items,
         "stocks": stocks,
         "choosen_stock": stock_id,
