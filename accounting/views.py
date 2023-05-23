@@ -169,7 +169,7 @@ def download_invoices(request):
 
     with zipfile.ZipFile(zip_path, "w") as zip_file:
         for invoice in invoices:
-            pdf_content = invoice.content  # předpokládám, že 'content' je BinaryField
+            pdf_content = invoice.content
             pdf_filename = f"faktura_{invoice.visit.pk}_{invoice.generated_at.strftime('%Y-%m-%d')}.pdf"
             zip_file.writestr(pdf_filename, pdf_content)
 
