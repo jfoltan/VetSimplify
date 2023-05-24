@@ -11,7 +11,7 @@ def sign_up(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("home")
+            return redirect("records:owner_list")
     else:
         form = RegistrationForm()
 
