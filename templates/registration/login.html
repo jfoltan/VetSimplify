@@ -1,28 +1,26 @@
 {% extends '_base.html' %}
-
 {% block title %}
-VetSimplify - Přihlásit se
+  VetSimplify - Přihlásit se
 {% endblock title %}
-
 {% load crispy_forms_tags %}
-
 {% block content %}
   <div class="flex flex-col justify-center min-h-screen py-12 bg-gray-50 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">Přihlásit se</h2>
       <p class="mt-2 text-sm text-center text-gray-600 leading-5 max-w">
         nebo ještě nemáte účet?
-        <a href="" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">Vytvořit nový účet</a>
+        <a href="{% url 'sign_up' %}"
+           class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">Vytvořit nový účet</a>
       </p>
     </div>
-
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
         <form method="post">
-            {% csrf_token %}{{ form|crispy }}
-            <button type="submit" class=" mt-10 flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
-              Přihlásit se
-            </button>
+          {% csrf_token %}{{ form|crispy }}
+          <button type="submit"
+                  class=" mt-10 flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+            Přihlásit se
+          </button>
         </form>
       </div>
     </div>
