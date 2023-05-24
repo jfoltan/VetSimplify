@@ -1,0 +1,1 @@
+web: gunicorn vetsimplify.wsgi
