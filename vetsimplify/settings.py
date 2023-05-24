@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-9-t748%pomj(&7ha9q$a!%8l=q#kqpa_4hzz#t5q1-xl&3p6aw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["jfoltan.eu.pythonanywhere.com"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -53,7 +53,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -143,13 +142,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
-
-STORAGES = {
-    # ...
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
