@@ -115,7 +115,7 @@ class VisitStockItem(models.Model):
     visit = models.ForeignKey(
         Visit, on_delete=models.CASCADE, related_name="stock_items"
     )
-    stock_item = models.ForeignKey("stock.StockItem", on_delete=models.CASCADE)
+    stock_item = models.ForeignKey("stock.StockItem", on_delete=models.PROTECT)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 

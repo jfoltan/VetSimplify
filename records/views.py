@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views.generic import (
@@ -362,13 +363,17 @@ def visit_update_view(request, owner_id, animal_id, animalcase_id, visit_id):
             formset.save()
             procedure_formset.save()
 
-            for form in formset.forms:
-                stock_item = form.cleaned_data.get("stock_item")
-                quantity = form.cleaned_data.get("quantity")
+            for form in formset:
+                if form.has_changed():
+                    stock_item = form.cleaned_data.get("stock_item")
+                    new_quantity = form.cleaned_data.get("quantity")
+                    initial_quantity = form.initial.get("quantity")
 
-                if stock_item and quantity:
-                    stock_item.units_in_stock -= quantity
-                    stock_item.save()
+                    if stock_item and new_quantity is not None and initial_quantity is not None:
+                        change_in_quantity = Decimal(initial_quantity) - Decimal(new_quantity)  
+                        if change_in_quantity != 0:
+                            stock_item.units_in_stock += change_in_quantity
+                            stock_item.save()
 
             if "generate_pdf" in request.POST:
                 # Smažte starou fakturu, pokud existuje
