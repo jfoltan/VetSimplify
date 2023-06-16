@@ -129,6 +129,7 @@ class InvoiceListView(LoginRequiredMixin, ListView):
         return Invoice.objects.order_by("-generated_at")
 
 
+@login_required
 def invoice_pdf_view(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     buffer = BytesIO(invoice.content)
@@ -139,6 +140,7 @@ def invoice_pdf_view(request, pk):
     return response
 
 
+@login_required
 def download_invoices(request):
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
