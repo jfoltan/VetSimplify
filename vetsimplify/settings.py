@@ -88,7 +88,7 @@ WSGI_APPLICATION = "vetsimplify.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "database",
+        "NAME": "vetsimplify_dev",
         "USER": "postgres",
         "PASSWORD": "postgres",
         "HOST": "localhost",
